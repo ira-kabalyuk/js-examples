@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<script>
+  /*что вернет this*/
+
+
+  //#1
+  const user = {
+    tag: 'Mango',
+    showTag() {
+      console.log(this);
+    }
+  };
+  user.showTag();  //вызов в контексте user
+
+  //#2
+  const foo = function () {
+    console.log(this)
+  };
+  foo() //вызов без контектста, вернет undefined
+
+  //#3
+  // Вызов функции как метод объекта, но объявлена она как внешняя функция.
+  // В контектсе объекта
+
+  const showTag = function () {
+    console.log('showTag -> this', this);
+    console.log('showTag -> this.tag', this.tag);
+  }
+  showTag(); //чему равен this? вернет undefined, т.к. функция вызвана без контекста объекта.
+
+  const user = {
+    tag: 'Mango',
+  };
+
+  //#4
+  // записываем в переменную ссылку на функцию showTag.
+  user.showUserTag = showTag;
+  // В объекте user, которрый вверху в коде, получаем новое свойство showUserTag с ссылкой на showTag
+  console.log('user', user);
+  user.showUserTag(); // какой this?
+
+  //#5
+  {
+    const user = {
+      tag: 'Mango',
+      showTag() {
+        console.log('showTag -> this', this);
+        console.log('showTag -> this.tag', this.tag);
+      }
+    };
+
+    user.showTag() //какой this?
+
+    const outerShowTag = user.showTag;
+
+    outerShowTag(); //какой this?
+    user.outerShowTag(); //какой this?
+
+    //#6
+    const xyz = user.showTag;
+    xyz() //какой this?
+  }
+
+  //#7
+  {
+    const user = {
+      tag: 'Mango',
+      showTag() {
+        console.log('showTag -> this', this);
+        console.log('showTag -> this.tag', this.tag);
+      }
+    };
+
+    const invokeAction = function (action) {
+      console.log(action);
+
+      action();
+    }
+
+    invokeAction(user.showTag); //какой this?
+    user.invokeAction(); //какой this?
+  }
+
+  //#8
+  {
+    const fn = function () {
+      console.log("fn -> this", this);
+    }
+
+    fn() //какой this?
+  }
+
+  //#9
+  {
+    const book = {
+      title: "React for beginners",
+      showThis() {
+        console.log('showThis -> this', this);
+      },
+      showTitle() {
+        console.log('showThis -> this.title', this.title);
+      },
+    }
+
+    book.showThis(); //какой this?
+
+    const outherShowThis = book.showThis;
+    outherShowThis(); //какой this?
+
+    const outherShowTitle = book.showTitle;
+    outherShowTitle(); //*** какой this?
+  }
+
+  //#10
+  {
+    const makeChangeColor = function () {
+      const changeColor = function (color) {
+        console.log('changeColor -> this', this);
+        this.color = color;
+      };
+
+      changeColor(); //какой this?
+
+      const sweater = {
+        color: 'teal',
+      }
+
+      sweater.updateColor = changeColor;
+      sweater.updateColor('red'); //какой this?
+
+      return sweater.updateColor;
+    }
+
+    makeChangeColor();
+
+    const swapColor = makeChangeColor();
+
+    swapColor('blue'); //какой this?
+  }
+
+  // #11
+  {
+    const makeChangeColor = function () {
+      const changeColor = function (color) {
+        console.log('changeColor -> this', this);
+        this.color = color;
+      };
+
+      return changeColor;
+    };
+
+    const updateColor = makeChangeColor();
+    updateColor('yellow'); //какой this?
+
+    const hat = {
+      color: 'blue',
+      updateColor,
+    }
+
+    hat.updateColor('orange') //какой this?
+  }
+
+  // #12
+  {
+    const counter = {
+      value: 0,
+      increment(value) {
+        console.log('increment -> this', this);
+        this.value += value;
+      },
+      decrement(value) {
+        console.log('decrement -> this', this);
+        this.value -= value;
+      },
+    };
+    const updateCounter = function (value, operation) {
+      operation(value)
+    };
+    updateCounter(10, counter.increment); //какой this?
+    updateCounter(5, counter.decrement);  //какой this?
+
+    //updateCounter(10, counter.increment.bind(counter)); // решение
+    //updateCounter(5, counter.decrement.bind(counter));  // решение
+  }
+  // при передаче метода объекта как колбека, контекст не сохраняется.
+
+  // #13 как вызвать функцию в контексте какого-то объекта
+  {
+    const showThis = function () {
+      console.log('showThis -> this', this);
+    }
+
+    showThis(); //undefined
+
+    const objA = {
+      a: 5,
+      b: 10,
+    };
+
+    showThis.call(objA) // {a: 5, b: 10}
+
+    const changeColor = function (color) {
+      console.log('changeColor -> this', this);
+      this.color = color;
+    }
+
+    const hat = {
+      color: 'black',
+    };
+    const sweater = {
+      color: 'green',
+    };
+
+    changeColor.call(hat, 'orange');
+    changeColor.call(sweater, 'red');
+
+    //bind - копия функции с привязанным контекстом. bind не вызывает функцию здесь и сейчас.
+    // Он делает копию функции с навсегда привязанным контекстом.
+
+    const changeHatColor = changeColor.bind(hat); // this всегда будет ссылаться на объект hat. При этом оригинальная функция не меняется.
+    changeHatColor();
+  }
+
+</script>
